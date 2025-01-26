@@ -21,7 +21,7 @@ export const List = (request, response) => {
             return response.status(200).json({ data: result });
         })
         .catch((err) => {
-            return response.status(500).json({ error: "Internal server error..", err })
+            return response.status(500).json({ error: "Internal server error.." })
         })
 }
 
