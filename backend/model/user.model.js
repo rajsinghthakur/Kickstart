@@ -1,5 +1,6 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../db/dbconfigration.js";
+import bcyrpt from "bcryptjs";
 
 const User = sequelize.define("user", {
     id: {
@@ -8,7 +9,7 @@ const User = sequelize.define("user", {
         autoIncrement: true
     },
     name: {
-        type: DataTypes.STRING,// default size - 255
+        type: DataTypes.STRING(30),
         allowNull: false
     },
     email: {
@@ -17,35 +18,43 @@ const User = sequelize.define("user", {
         unique: true
     },
     password: {
-        type: DataTypes.STRING(10),
-        allowNull: false
+        type: DataTypes.STRING,
+        allowNull: false,
+        set(value) {
+            let saltkey = bcyrpt.genSaltSync(10);
+            let encryptedPassword = bcyrpt.hashSync(value, saltkey);
+            this.setDataValue("password", encryptedPassword);
+        }
     },
     contactNumber: {
         type: DataTypes.STRING(10),
         allowNull: false
     },
-    isActive: {
+    isDeleted: {
         type: DataTypes.BOOLEAN,
         allowNull: false
     },
     rollId: {
         type: DataTypes.INTEGER,
         references: {
-            model: "Rolls", // Ensure the table name matches your database
+            model: "Rolls",
             key: "id"
         }
     }
 });
 
+User.checkPassword = (originalPassword, encryptedPassword) => {
+    console.log("check Password called....");
+    return bcyrpt.compareSync(originalPassword, encryptedPassword);
+}
+
 sequelize.sync()
     .then(() => {
-        console.log("user table created.....");
+        console.log("User table created.....");
     })
     .catch((err) => {
-        console.log("user somthing wrong....");
+        console.log("User table somthing wrong....");
         console.log(err);
     })
 
 export default User;
-
-// async , await

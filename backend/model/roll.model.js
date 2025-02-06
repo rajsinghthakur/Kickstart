@@ -7,9 +7,10 @@ const Roll = sequelize.define("roll", {
         primaryKey: true,
         autoIncrement: true
     },
-    name: {
-        type: DataTypes.STRING,// default size - 255
-        allowNull: false
+    roll: {
+        type: DataTypes.STRING(50),
+        allowNull: false,
+        unique: true
     },
     isActive: {
         type: DataTypes.BOOLEAN,
@@ -19,13 +20,11 @@ const Roll = sequelize.define("roll", {
 
 sequelize.sync()
     .then(() => {
-        console.log("roll table created.....");
+        console.log("Roll table created.....");
     })
     .catch((err) => {
-        console.log("roll somthing wrong....");
+        console.log("Roll table somthing wrong....");
         console.log(err);
     })
 
 export default Roll;
-
-// async , await

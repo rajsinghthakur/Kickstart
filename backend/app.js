@@ -1,18 +1,27 @@
 import express from 'express';
-import bodyParser from 'body-parser';
+import cors from 'cors';
 import RollRouter from './routes/roll.route.js';
 import UserRouter from './routes/user.route.js';
-import cors from 'cors';
 
 const app = express();
 
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
-app.use(cors());
+// Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
+// CORS Configuration (Optional: Adjust as needed)
+app.use(cors({
+    origin: '*', // Allowed origins, modify this in production
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// Routes
 app.use("/roll", RollRouter);
-app.use("/user", UserRouter)
+app.use("/user", UserRouter);
 
-app.listen(3001, () => {
-    console.log("server started.......");
-})
+// Start Server
+const PORT = 3001;
+app.listen(PORT, () => {
+    console.log(`🚀 Server started on http://localhost:${PORT}`);
+});

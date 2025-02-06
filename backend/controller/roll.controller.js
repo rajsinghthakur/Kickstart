@@ -1,24 +1,40 @@
+import { validationResult } from "express-validator";
+import { User } from "../model/association.js";
 import Roll from "../model/roll.model.js";
 
-// insert into Roll (name, isActive);
-export const Add = (request, response) => {
-    Roll.create({
-        name: request.body.name,
-        isActive: request.body.isActive
-    })
-        .then((result) => {
-            return response.status(200).json({ message: "Roll added successfully.." })
+//add roll
+export const Add = async (request, response) => {
+    //error validation message
+    const errors = validationResult(request);
+    if (!errors.isEmpty())
+        return response.status(401).json({ error: errors.array() });
+
+    let roll = await Roll.findOne({ where: { roll: request.body.roll }, raw: true });
+
+    if (roll == null) {
+        Roll.create({
+            roll: request.body.roll,
+            isActive: request.body.isActive
         })
-        .catch((err) => {
-            return response.status(500).json({ error: "Internal server error..", err })
-        })
+            .then((result) => {
+                return response.status(200).json({ message: "Roll added successfully.." })
+            })
+            .catch((err) => {
+                return response.status(500).json({ error: "Internal server error.." })
+            })
+    } else {
+        return response.status(401).json({ message: "record is already exist" });
+    }
 }
 
-// select * from Roll;
+//Roll list;
 export const List = (request, response) => {
-    Roll.findAll()
+    Roll.findAll({ include: [{ model: User, as: "users" }] })
         .then((result) => {
-            return response.status(200).json({ data: result });
+            if (result)
+                return response.status(200).json({ data: result })
+            else
+                return response.status(200).json({ message: "Record not found....." });
         })
         .catch((err) => {
             return response.status(500).json({ error: "Internal server error.." })
@@ -26,8 +42,13 @@ export const List = (request, response) => {
 }
 
 
-// select * from Roll where id = ?;
+// search
 export const Search = (request, response) => {
+    //error validation message
+    const errors = validationResult(request);
+    if (!errors.isEmpty())
+        return response.status(401).json({ error: errors.array() });
+
     Roll.findOne({
         where: {
             id: request.body.id
@@ -35,53 +56,55 @@ export const Search = (request, response) => {
     })
         .then((result) => {
             if (result)
-                return response.status(200).json({ message: "signIn successful..", data: result })
+                return response.status(200).json({ data: result })
             else
-                return response.status(200).json({ message: "unautherized request....." });
+                return response.status(200).json({ message: "Record not found....." });
         })
         .catch((err) => {
-            return response.status(500).json({ error: "Internal server error..", err })
+            return response.status(500).json({ error: "Internal server error.." })
         })
 }
 
 
-// delete from Roll where id = 3;
+// remove
 export const Remove = (request, response) => {
+    //error validation message
+    const errors = validationResult(request);
+    if (!errors.isEmpty())
+        return response.status(401).json({ error: errors.array() });
+
     Roll.destroy({ where: { id: request.body.id } })
         .then((result) => {
             if (result)
-                return response.status(200).json({ message: "remove successfuly....." });
+                return response.status(200).json({ message: "Record remove successfuly....." });
             else
-                return response.status(200).json({ message: "unautherized request....." });
+                return response.status(200).json({ message: "Record not found....." });
         })
         .catch((err) => {
-            return response.status(500).json({ error: "Internal server error..", err })
+            return response.status(500).json({ error: "Internal server error.." })
         })
 }
 
-// update Roll set name = 'raj thakur', contactNumber = "5654543432" where id = 5;
+// update
 export const Update = (request, response) => {
+    //error validation message
+    const errors = validationResult(request);
+    if (!errors.isEmpty())
+        return response.status(401).json({ error: errors.array() });
+
     Roll.update({
-        name: request.body.name,
+        roll: request.body.roll,
         isActive: request.body.isActive
     }, {
         where: { id: request.body.id }
     })
         .then((result) => {
             if (result[0])
-                return response.status(200).json({ message: "update successfuly....." });
+                return response.status(200).json({ message: "Record update successfuly....." });
             else
-                return response.status(200).json({ message: "unautherized request....." });
+                return response.status(200).json({ message: "Record not found....." });
         })
         .catch((err) => {
             return response.status(500).json({ error: "Internal server error..", err })
         })
 }
-
-
-
-// insert - create
-// delete - destory
-// update - update
-// read - findAll
-// search - findone
